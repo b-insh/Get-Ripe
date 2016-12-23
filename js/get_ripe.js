@@ -7,6 +7,7 @@ function init() {
   createMango();
   // createSunshine();
   createWateringCan();
+  createParticles();
   // createHelper();
 
   loop();
@@ -49,7 +50,7 @@ function createScene() {
   container.appendChild(renderer.domElement);
 
   window.addEventListener('resize', handleWindowResize, false);
-  // document.addEventListener('mousedown', onDocumentMouseDown, false);
+  document.addEventListener('mousedown', onDocumentMouseDown, false);
   document.addEventListener('mousemove', onDocumentMouseMove, false);
   document.addEventListener('mouseup', onDocumentMouseUp, false);
 
@@ -114,7 +115,7 @@ function createTree() {
   tree.mesh.position.y = 0;
   tree.mesh.position.z = -200;
   scene.add(tree.mesh);
-  objects.push(tree.mesh);
+  // objects.push(tree.mesh);
 }
 
 const Leaves = function() {
@@ -156,7 +157,7 @@ function createLeaves() {
   leaves.mesh.position.y = 130;
   leaves.mesh.position.z = -200;
   scene.add(leaves.mesh);
-  objects.push(leaves.mesh);
+  // objects.push(leaves.mesh);
 }
 
 const Mango = function() {
@@ -202,10 +203,11 @@ function createMango() {
   mango.mesh.position.y = 95;
   mango.mesh.position.z = -145;
   scene.add(mango.mesh);
-  objects.push(mango.mesh);
+  // objects.push(mango.mesh);
 }
 
 const WateringCan = function() {
+  const combined = new THREE.Geometry();
   this.mesh = new THREE.Object3D();
   const mat = new THREE.MeshStandardMaterial({ metalness: 0.8, color: 0xadb2bd });
 
@@ -213,36 +215,50 @@ const WateringCan = function() {
   const geomCan = new THREE.CylinderGeometry(15, 15, 25, 10, 10);
   // const hollowCan = new THREE.CylinderGeometry(10, 10, 25, 10, 10);
   geomCan.applyMatrix( new THREE.Matrix4().makeScale(1.1, 1.0, 0.6));
-  geomCan.computeBoundingBox();
-  geomCan.computeFaceNormals();
+  // geomCan.computeBoundingBox();
+  // geomCan.computeFaceNormals();
   const can = new THREE.Mesh(geomCan, mat);
-  can.castShadow = true;
-  can.receiveShadow = true;
-  this.mesh.add(can);
+  can.updateMatrix();
+  combined.merge(can.geometry, can.matrix);
+  // can.castShadow = true;
+  // can.receiveShadow = true;
+  // this.mesh.add(can);
+
 
   // Create the handle
   const geomHandle = new THREE.TorusGeometry( 10, 2, 8, 6, Math.PI);
   geomHandle.applyMatrix( new THREE.Matrix4().makeScale(0.9, 1.1, 1.0));
+  // can.updateMatrix();
+  // geomHandle.merge(can.geometry, can.matrix);
   const handle = new THREE.Mesh(geomHandle, mat);
   handle.rotation.z = 4.5;
   handle.position.x = 13.5;
-  handle.castShadow = true;
-  handle.receiveShadow = true;
-  this.mesh.add(handle);
+  handle.updateMatrix();
+  combined.merge(handle.geometry, handle.matrix);
+
+  // handle.castShadow = true;
+  // handle.receiveShadow = true;
+  // this.mesh.add(handle);
 
   // Create spout
   const geomSpout = new THREE.CylinderGeometry(1, 3, 20, 5, 5);
+  // handle.updateMatrix();
+  // geomSpout.merge(handle.geometry, handle.matrix);
   const spout = new THREE.Mesh(geomSpout, mat);
   spout.rotation.z = 1;
   spout.position.x = -22;
   spout.position.y = 10;
   spout.position.z = 3;
-  spout.castShadow = true;
-  spout.receiveShadow = true;
-  this.mesh.add(spout);
+  spout.updateMatrix();
+  combined.merge(spout.geometry, spout.matrix);
+  combined.castShadow = true;
+  combined.receiveShadow = true;
+  const allMerged = new THREE.Mesh(combined, mat);
+  this.mesh.add(allMerged);
 
-  const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  domEvents.addEventListener(can, 'mousedown', (e) => onWateringCanMouseDown(e));
+
+  // const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+  // domEvents.addEventListener(can, 'mousedown', (e) => onWateringCanMouseDown(e));
 };
 
 let wateringCan;
@@ -256,6 +272,30 @@ function createWateringCan() {
   objects.push(wateringCan.mesh);
 }
 
+function createParticles() {
+  const particleCount = 1000;
+  const geomParticle = new THREE.Geometry();
+  const matParticle = new THREE.PointsMaterial({
+    color: 0x40a4df,
+    size: 3,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending,
+    depthTest: false,
+  });
+
+  for (let i = 0; i < particleCount; i++) {
+    const pX = Math.random() * 300 - 150;
+    const pY = Math.random() * 300 - 150;
+    const pZ = Math.random() * 300 - 150;
+    const particle = new THREE.Vector3(pX, pY, pZ);
+    geomParticle.vertices.push(particle);
+  }
+
+  const particleCloud = new THREE.Points(geomParticle, matParticle);
+  scene.add(particleCloud);
+}
+
 let plane;
 function createPlane() {
   plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, alphaTest: 0, visible: false }));
@@ -263,7 +303,8 @@ function createPlane() {
 }
 
 let selection;
-function onWateringCanMouseDown(e) {
+function onDocumentMouseDown(e) {
+  e.preventDefault();
   // get mouse position
   const mouseX = (e.clientX / WIDTH) * 2 - 1;
   const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
@@ -285,6 +326,7 @@ function onWateringCanMouseDown(e) {
 }
 
 function onDocumentMouseMove(e) {
+  e.preventDefault();
   const mouseX = (e.clientX / WIDTH) * 2 - 1;
   const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
 
