@@ -1,18 +1,19 @@
 function init() {
   createScene();
   createLights();
+  createPlane();
   createTree();
   createLeaves();
   createMango();
   // createSunshine();
   createWateringCan();
-  // createSky();
+  // createHelper();
 
   loop();
 }
 
 // CREATE SCENE
-let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, axes;
+let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, raycaster, offset;
 
 function createScene() {
   HEIGHT = window.innerHeight;
@@ -48,6 +49,12 @@ function createScene() {
   container.appendChild(renderer.domElement);
 
   window.addEventListener('resize', handleWindowResize, false);
+  // document.addEventListener('mousedown', onDocumentMouseDown, false);
+  document.addEventListener('mousemove', onDocumentMouseMove, false);
+  document.addEventListener('mouseup', onDocumentMouseUp, false);
+
+  raycaster = new THREE.Raycaster();
+  offset = new THREE.Vector3();
 }
 
 // RESIZE WINDOW
@@ -61,7 +68,6 @@ function handleWindowResize() {
 
 // CREATE LIGHTS
 let hemisphereLight, shadowLight;
-
 function createLights() {
   hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, 0.9);
 
@@ -85,6 +91,7 @@ function createLights() {
 
 }
 
+let objects = [];
 const Tree = function() {
   this.mesh = new THREE.Object3D();
 
@@ -103,13 +110,16 @@ const Tree = function() {
 let tree;
 function createTree() {
   tree = new Tree();
-  tree.mesh.position.y = 30;
+  tree.name = "trunk";
+  tree.mesh.position.y = 0;
   tree.mesh.position.z = -200;
   scene.add(tree.mesh);
+  objects.push(tree.mesh);
 }
 
 const Leaves = function() {
   this.mesh = new THREE.Object3D();
+
 
   const geom = new THREE.SphereGeometry(20, 20, 20);
   const mat = new THREE.MeshPhongMaterial({
@@ -118,33 +128,35 @@ const Leaves = function() {
 
   const numLeaves = 150 + Math.floor(Math.random() * 150);
   for (let i = 0; i < numLeaves; i++) {
-    const m = new THREE.Mesh(geom, mat);
+    const leaf = new THREE.Mesh(geom, mat);
 
-    // set random position of cube
-    m.position.x = Math.random() * 180;
-		m.position.y = Math.random() * 150;
-		m.position.z = Math.random() * 150;
-		m.rotation.z = Math.random() * Math.PI * 2;
-		m.rotation.y = Math.random() * Math.PI * 2;
+    // set random position of leaf
+    leaf.position.x = Math.random() * 180;
+		leaf.position.y = Math.random() * 150;
+		leaf.position.z = Math.random() * 150;
+		leaf.rotation.z = Math.random() * Math.PI * 2;
+		leaf.rotation.y = Math.random() * Math.PI * 2;
 
-    //set random size of cube
+    //set random size of leaf
     const s = 1 + Math.random() * 0.9;
-    m.scale.set(s, s, s);
+    leaf.scale.set(s, s, s);
 
-    m.castShadow = true;
-    m.receiveShadow = true;
+    leaf.castShadow = true;
+    leaf.receiveShadow = true;
 
-    this.mesh.add(m);
+    this.mesh.add(leaf);
   }
 };
 
 let leaves;
 function createLeaves() {
   leaves = new Leaves();
+  leaves.name = "leaves";
   leaves.mesh.position.x = -110;
-  leaves.mesh.position.y = 160;
+  leaves.mesh.position.y = 130;
   leaves.mesh.position.z = -200;
   scene.add(leaves.mesh);
+  objects.push(leaves.mesh);
 }
 
 const Mango = function() {
@@ -185,20 +197,24 @@ const Mango = function() {
 let mango;
 function createMango() {
   mango = new Mango();
+  mango.name = "mango";
   mango.mesh.position.x = 55;
-  mango.mesh.position.y = 120;
+  mango.mesh.position.y = 95;
   mango.mesh.position.z = -145;
   scene.add(mango.mesh);
+  objects.push(mango.mesh);
 }
 
 const WateringCan = function() {
   this.mesh = new THREE.Object3D();
-  const mat = new THREE.MeshPhongMaterial({ metalness: 1, color: 0xadb2bd });
+  const mat = new THREE.MeshStandardMaterial({ metalness: 0.8, color: 0xadb2bd });
 
   // Create the can
   const geomCan = new THREE.CylinderGeometry(15, 15, 25, 10, 10);
   // const hollowCan = new THREE.CylinderGeometry(10, 10, 25, 10, 10);
   geomCan.applyMatrix( new THREE.Matrix4().makeScale(1.1, 1.0, 0.6));
+  geomCan.computeBoundingBox();
+  geomCan.computeFaceNormals();
   const can = new THREE.Mesh(geomCan, mat);
   can.castShadow = true;
   can.receiveShadow = true;
@@ -224,15 +240,73 @@ const WateringCan = function() {
   spout.castShadow = true;
   spout.receiveShadow = true;
   this.mesh.add(spout);
+
+  const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+  domEvents.addEventListener(can, 'mousedown', (e) => onWateringCanMouseDown(e));
 };
 
 let wateringCan;
 function createWateringCan() {
   wateringCan = new WateringCan();
-  wateringCan.mesh.position.x = -400;
-  wateringCan.mesh.position.y = 0;
-  wateringCan.mesh.position.z = 0;
+  wateringCan.name = "wateringCan";
+  wateringCan.mesh.position.x = 120;
+  wateringCan.mesh.position.y = -30;
+  wateringCan.mesh.position.z = -10;
   scene.add(wateringCan.mesh);
+  objects.push(wateringCan.mesh);
+}
+
+let plane;
+function createPlane() {
+  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, alphaTest: 0, visible: false }));
+  scene.add(plane);
+}
+
+let selection;
+function onWateringCanMouseDown(e) {
+  // get mouse position
+  const mouseX = (e.clientX / WIDTH) * 2 - 1;
+  const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
+  // get 3D vector from 3D mouse position using unproject function
+  const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
+  mouse3D.unproject(camera);
+  // set raycaster position
+  raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
+  // find intersected objects
+  const intersectedObjects = raycaster.intersectObjects(objects, true); // returns array sorted by distance
+  if (intersectedObjects.length > 0) {
+    // grab the closest object
+    selection = intersectedObjects[0].object;
+    // calculate the offset
+    const intersectPlane = raycaster.intersectObject(plane);
+    offset.z = selection.position.z;
+    offset.copy(intersectPlane[0].point).sub(plane.position);
+  }
+}
+
+function onDocumentMouseMove(e) {
+  const mouseX = (e.clientX / WIDTH) * 2 - 1;
+  const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
+
+  const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
+  mouse3D.unproject(camera);
+  raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
+  raycaster.setFromCamera( mouse3D.clone(), camera);
+  if (selection) {
+    offset.z = selection.position.z;
+    const intersectPlane = raycaster.intersectObject(plane);
+    selection.position.copy(intersectPlane[0].point.sub(offset));
+  } else {
+    const intersectedObjects = raycaster.intersectObjects(objects);
+    if (intersectedObjects.length > 0) {
+      plane.position.copy(intersectedObjects[0].object.position);
+      plane.lookAt(camera.position);
+    }
+  }
+}
+
+function onDocumentMouseUp(e) {
+  selection = null;
 }
 
 // CREATE LOOP SO IT RENDERS
@@ -240,16 +314,6 @@ function loop() {
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
