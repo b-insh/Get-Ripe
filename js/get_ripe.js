@@ -114,7 +114,6 @@ function createTree() {
   tree.mesh.position.y = 0;
   tree.mesh.position.z = -200;
   scene.add(tree.mesh);
-  // objects.push(tree.mesh);
 }
 
 const Leaves = function() {
@@ -156,7 +155,6 @@ function createLeaves() {
   leaves.mesh.position.y = 130;
   leaves.mesh.position.z = -200;
   scene.add(leaves.mesh);
-  // objects.push(leaves.mesh);
 }
 
 const Mango = function() {
@@ -203,10 +201,8 @@ function createMango() {
   mango.mesh.position.y = 95;
   mango.mesh.position.z = -145;
   scene.add(mango.mesh);
-  // objects.push(mango.mesh);
 }
 
-let particleGroup;
 const WateringCan = function() {
   const merged = new THREE.Geometry();
   this.mesh = new THREE.Object3D();
@@ -257,7 +253,7 @@ function createWateringCan() {
 
 let options, spawnerOptions;
 function createParticles() {
-  particleGroup = new THREE.GPUParticleSystem({
+  const particleGroup = new THREE.GPUParticleSystem({
     maxParticles: 25000,
   });
   scene.add(particleGroup);
@@ -265,7 +261,7 @@ function createParticles() {
   options = {
     position: new THREE.Vector3(),
     positionRandomness: 1,
-    velocity: new THREE.Vector3(0, 0, 0),
+    velocity: new THREE.Vector3(),
     velocityRandomness: 1,
     color: 0x40a4df,
     colorRandomness: 0.4,
@@ -361,12 +357,6 @@ function loop() {
   }
   renderer.render(scene, camera);
 }
-
-
-
-
-
-
 
 
 
