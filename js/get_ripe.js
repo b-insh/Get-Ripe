@@ -5,20 +5,19 @@ function init() {
   createTree();
   createLeaves();
   createMango();
-  // createSunshine();
   createWateringCan();
-  createParticles();
-  // createHelper();
 
   loop();
 }
 
 // CREATE SCENE
-let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, raycaster, offset;
+let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, raycaster, offset, clock;
 
 function createScene() {
   HEIGHT = window.innerHeight;
   WIDTH = window.innerWidth;
+
+  clock = new THREE.Clock(true);
 
   scene = new THREE.Scene();
 
@@ -191,7 +190,8 @@ const Mango = function() {
   domEvents.addEventListener(mango, 'click', function increaseMangoSize(e) {
     mango.scale.multiplyScalar(1.1);
   });
-
+  mango.castShadow = true;
+  mango.recieveShadow = true;
   this.mesh.add(mango);
 };
 
@@ -206,94 +206,81 @@ function createMango() {
   // objects.push(mango.mesh);
 }
 
+let particleGroup;
 const WateringCan = function() {
-  const combined = new THREE.Geometry();
+  const merged = new THREE.Geometry();
   this.mesh = new THREE.Object3D();
   const mat = new THREE.MeshStandardMaterial({ metalness: 0.8, color: 0xadb2bd });
 
-  // Create the can
   const geomCan = new THREE.CylinderGeometry(15, 15, 25, 10, 10);
-  // const hollowCan = new THREE.CylinderGeometry(10, 10, 25, 10, 10);
   geomCan.applyMatrix( new THREE.Matrix4().makeScale(1.1, 1.0, 0.6));
-  // geomCan.computeBoundingBox();
-  // geomCan.computeFaceNormals();
-  const can = new THREE.Mesh(geomCan, mat);
+  const can = new THREE.Mesh(geomCan);
   can.updateMatrix();
-  combined.merge(can.geometry, can.matrix);
-  // can.castShadow = true;
-  // can.receiveShadow = true;
-  // this.mesh.add(can);
+  merged.merge(can.geometry, can.matrix);
 
-
-  // Create the handle
   const geomHandle = new THREE.TorusGeometry( 10, 2, 8, 6, Math.PI);
   geomHandle.applyMatrix( new THREE.Matrix4().makeScale(0.9, 1.1, 1.0));
-  // can.updateMatrix();
-  // geomHandle.merge(can.geometry, can.matrix);
-  const handle = new THREE.Mesh(geomHandle, mat);
+  const handle = new THREE.Mesh(geomHandle);
   handle.rotation.z = 4.5;
   handle.position.x = 13.5;
   handle.updateMatrix();
-  combined.merge(handle.geometry, handle.matrix);
+  merged.merge(handle.geometry, handle.matrix);
 
-  // handle.castShadow = true;
-  // handle.receiveShadow = true;
-  // this.mesh.add(handle);
-
-  // Create spout
   const geomSpout = new THREE.CylinderGeometry(1, 3, 20, 5, 5);
-  // handle.updateMatrix();
-  // geomSpout.merge(handle.geometry, handle.matrix);
-  const spout = new THREE.Mesh(geomSpout, mat);
+  const spout = new THREE.Mesh(geomSpout);
   spout.rotation.z = 1;
   spout.position.x = -22;
   spout.position.y = 10;
   spout.position.z = 3;
   spout.updateMatrix();
-  combined.merge(spout.geometry, spout.matrix);
-  combined.castShadow = true;
-  combined.receiveShadow = true;
-  const allMerged = new THREE.Mesh(combined, mat);
-  this.mesh.add(allMerged);
+  merged.merge(spout.geometry, spout.matrix);
 
-
-  // const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  // domEvents.addEventListener(can, 'mousedown', (e) => onWateringCanMouseDown(e));
+  merged.castShadow = true;
+  merged.receiveShadow = true;
+  const merged3D = new THREE.Mesh(merged, mat);
+  this.mesh.add(merged3D);
 };
 
 let wateringCan;
 function createWateringCan() {
   wateringCan = new WateringCan();
-  wateringCan.name = "wateringCan";
   wateringCan.mesh.position.x = 120;
   wateringCan.mesh.position.y = -30;
   wateringCan.mesh.position.z = -10;
+
+  const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+  domEvents.addEventListener(wateringCan.mesh, 'click', () => createParticles());
+
   scene.add(wateringCan.mesh);
   objects.push(wateringCan.mesh);
 }
 
+let options, spawnerOptions;
 function createParticles() {
-  const particleCount = 1000;
-  const geomParticle = new THREE.Geometry();
-  const matParticle = new THREE.PointsMaterial({
-    color: 0x40a4df,
-    size: 3,
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.AdditiveBlending,
-    depthTest: false,
+  particleGroup = new THREE.GPUParticleSystem({
+    maxParticles: 25000,
   });
+  scene.add(particleGroup);
 
-  for (let i = 0; i < particleCount; i++) {
-    const pX = Math.random() * 300 - 150;
-    const pY = Math.random() * 300 - 150;
-    const pZ = Math.random() * 300 - 150;
-    const particle = new THREE.Vector3(pX, pY, pZ);
-    geomParticle.vertices.push(particle);
-  }
+  options = {
+    position: new THREE.Vector3(),
+    positionRandomness: 1,
+    velocity: new THREE.Vector3(0, 0, 0),
+    velocityRandomness: 1,
+    color: 0x40a4df,
+    colorRandomness: 0.4,
+    turbulence: 1,
+    lifetime: 0.5,
+    size: 10,
+    sizeRandomness: 3,
+  };
 
-  const particleCloud = new THREE.Points(geomParticle, matParticle);
-  scene.add(particleCloud);
+  spawnerOptions = {
+    spawnRate: 15000,
+    horizontalSpeed: 1.5,
+    verticalSpeed: 0.3,
+    timeScale: 1
+  };
 }
 
 let plane;
@@ -320,7 +307,6 @@ function onDocumentMouseDown(e) {
     selection = intersectedObjects[0].object;
     // calculate the offset
     const intersectPlane = raycaster.intersectObject(plane);
-    offset.z = selection.position.z;
     offset.copy(intersectPlane[0].point).sub(plane.position);
   }
 }
@@ -335,9 +321,8 @@ function onDocumentMouseMove(e) {
   raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
   raycaster.setFromCamera( mouse3D.clone(), camera);
   if (selection) {
-    offset.z = selection.position.z;
     const intersectPlane = raycaster.intersectObject(plane);
-    selection.position.copy(intersectPlane[0].point.sub(offset));
+    selection.position.copy(intersectPlane[0].point);
   } else {
     const intersectedObjects = raycaster.intersectObjects(objects);
     if (intersectedObjects.length > 0) {
@@ -352,9 +337,29 @@ function onDocumentMouseUp(e) {
 }
 
 // CREATE LOOP SO IT RENDERS
+let tick = 0;
 function loop() {
-  renderer.render(scene, camera);
   requestAnimationFrame(loop);
+
+  if (typeof spawnerOptions === "object") {
+
+    let delta = clock.getDelta() * spawnerOptions.timeScale;
+    tick += delta;
+
+
+    if (tick < 0) tick = 0;
+    particleGroup.position.x = wateringCan.mesh.position.x - 30;
+    particleGroup.position.y = wateringCan.mesh.position.y + 17;
+    particleGroup.dynamic = true;
+    if (delta > 0) {
+      for (let i = 0; i < spawnerOptions.spawnRate * delta; i++) {
+        particleGroup.spawnParticle(options);
+      }
+    }
+
+    particleGroup.update(tick);
+  }
+  renderer.render(scene, camera);
 }
 
 
