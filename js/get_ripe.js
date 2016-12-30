@@ -184,10 +184,10 @@ const Mango = function() {
   });
   const mango = new THREE.Mesh(geom, mat);
 
-  const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  domEvents.addEventListener(mango, 'click', function increaseMangoSize(e) {
-    mango.scale.multiplyScalar(1.1);
-  });
+  // const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+  // domEvents.addEventListener(mango, 'click', function increaseMangoSize(e) {
+  //   mango.scale.multiplyScalar(1.1);
+  // });
   mango.castShadow = true;
   mango.recieveShadow = true;
   this.mesh.add(mango);
@@ -195,8 +195,8 @@ const Mango = function() {
 
 let mango;
 function createMango() {
+  pouring = false;
   mango = new Mango();
-  mango.name = "mango";
   mango.mesh.position.x = 55;
   mango.mesh.position.y = 95;
   mango.mesh.position.z = -145;
@@ -251,9 +251,10 @@ function createWateringCan() {
   objects.push(wateringCan.mesh);
 }
 
-let options, spawnerOptions;
+let particleGroup, options, spawnerOptions, pouring = false;
 function createParticles() {
-  const particleGroup = new THREE.GPUParticleSystem({
+  pouring = true;
+  particleGroup = new THREE.GPUParticleSystem({
     maxParticles: 25000,
   });
   scene.add(particleGroup);
@@ -313,8 +314,8 @@ function onDocumentMouseMove(e) {
   const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
 
   const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
-  mouse3D.unproject(camera);
-  raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
+  // mouse3D.unproject(camera);
+  // raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
   raycaster.setFromCamera( mouse3D.clone(), camera);
   if (selection) {
     const intersectPlane = raycaster.intersectObject(plane);
@@ -330,6 +331,13 @@ function onDocumentMouseMove(e) {
 
 function onDocumentMouseUp(e) {
   selection = null;
+}
+
+function increaseMangoSize() {
+  pouring = false;
+  sleep(2);
+  // geom.applyMatrix( new THREE.Matrix4().makeScale(1.0, 1.3, 0.6));
+  mango.mesh.scale.set(1.2, 1.2, 1.2);
 }
 
 // CREATE LOOP SO IT RENDERS
@@ -354,6 +362,10 @@ function loop() {
     }
 
     particleGroup.update(tick);
+  }
+
+  if (pouring) {
+    increaseMangoSize();
   }
   renderer.render(scene, camera);
 }
