@@ -202,7 +202,7 @@ function createMango() {
 }
 
 const WateringCan = function() {
-  const merged = new THREE.Geometry();
+  const mergedCan = new THREE.Geometry();
   this.mesh = new THREE.Object3D();
   const mat = new THREE.MeshStandardMaterial({ metalness: 0.8, color: 0xadb2bd });
 
@@ -210,7 +210,7 @@ const WateringCan = function() {
   geomCan.applyMatrix( new THREE.Matrix4().makeScale(1.1, 1.0, 0.6));
   const can = new THREE.Mesh(geomCan);
   can.updateMatrix();
-  merged.merge(can.geometry, can.matrix);
+  mergedCan.merge(can.geometry, can.matrix);
 
   const geomHandle = new THREE.TorusGeometry( 10, 2, 8, 6, Math.PI);
   geomHandle.applyMatrix( new THREE.Matrix4().makeScale(0.9, 1.1, 1.0));
@@ -218,7 +218,7 @@ const WateringCan = function() {
   handle.rotation.z = 4.5;
   handle.position.x = 13.5;
   handle.updateMatrix();
-  merged.merge(handle.geometry, handle.matrix);
+  mergedCan.merge(handle.geometry, handle.matrix);
 
   const geomSpout = new THREE.CylinderGeometry(1, 3, 20, 5, 5);
   const spout = new THREE.Mesh(geomSpout);
@@ -227,12 +227,12 @@ const WateringCan = function() {
   spout.position.y = 10;
   spout.position.z = 3;
   spout.updateMatrix();
-  merged.merge(spout.geometry, spout.matrix);
+  mergedCan.merge(spout.geometry, spout.matrix);
 
-  merged.castShadow = true;
-  merged.receiveShadow = true;
-  const merged3D = new THREE.Mesh(merged, mat);
-  this.mesh.add(merged3D);
+  mergedCan.castShadow = true;
+  mergedCan.receiveShadow = true;
+  const mergedCan3D = new THREE.Mesh(mergedCan, mat);
+  this.mesh.add(mergedCan3D);
 };
 
 let wateringCan;
@@ -250,6 +250,7 @@ function createWateringCan() {
 }
 
 const Sun = function() {
+  const mergedSun = new THREE.Geometry();
   this.mesh = new THREE.Object3D();
 
   const sunGeom = new THREE.SphereGeometry(30, 10, 10);
@@ -260,11 +261,15 @@ const Sun = function() {
     shininess: 10,
   });
 
-  const sun = new THREE.Mesh(sunGeom, sunMat);
+  const sun = new THREE.Mesh(sunGeom);
 
-  sun.castShadow = true;
-  sun.receiveShadow = true;
-  this.mesh.add(sun);
+  sun.updateMatrix();
+  mergedSun.merge(sun.geometry, sun.matrix);
+
+  mergedSun.castShadow = true;
+  mergedSun.receiveShadow = true;
+  const mergedSun3D = new THREE.Mesh(mergedSun, sunMat);
+  this.mesh.add(mergedSun3D);
 };
 
 const Glow = function() {
@@ -292,13 +297,13 @@ function createSun() {
   scene.add(glow.mesh);
 }
 
-let spotLight;
+let sunlight;
 function createSunlight() {
-  spotLight = new THREE.SpotLight( 0xfffff );
-  spotLight.position.set( -220, 220, 0);
-  spotLight.castShadow = true;
+  sunlight = new THREE.SpotLight( 0xfffff );
+  sunlight.position.set( -220, 220, 0);
+  sunlight.castShadow = true;
 
-  scene.add(spotLight);
+  scene.add(sunlight);
 }
 
 let shining = true;
@@ -308,7 +313,7 @@ function toggleSunlight() {
     decreaseMangoSize();
     shining = false;
   } else {
-    scene.remove(spotLight);
+    scene.remove(sunlight);
     shining = true;
   }
 }
