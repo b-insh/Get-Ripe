@@ -115,7 +115,6 @@
 	  offset = new THREE.Vector3();
 	}
 	
-	// RESIZE WINDOW
 	function handleWindowResize() {
 	  HEIGHT = window.innerHeight;
 	  WIDTH = window.innerWidth;
@@ -124,7 +123,6 @@
 	  camera.updateProjectionMatrix();
 	}
 	
-	// CREATE LIGHTS
 	var hemisphereLight = void 0,
 	    shadowLight = void 0;
 	function createLights() {
@@ -144,7 +142,6 @@
 	  shadowLight.shadow.mapSize.width = 2048;
 	  shadowLight.shadow.mapSize.height = 2048;
 	
-	  // activate lights
 	  scene.add(hemisphereLight);
 	  scene.add(shadowLight);
 	}
@@ -168,7 +165,6 @@
 	var tree = void 0;
 	function createTree() {
 	  tree = new Tree();
-	  tree.name = "trunk";
 	  tree.mesh.position.y = 0;
 	  tree.mesh.position.z = -200;
 	  scene.add(tree.mesh);
@@ -186,15 +182,11 @@
 	  for (var i = 0; i < numLeaves; i++) {
 	    var leaf = new THREE.Mesh(geom, mat);
 	
-	    // set random position of leaf
 	    leaf.position.x = Math.random() * 180;
 	    leaf.position.y = Math.random() * 150;
 	    leaf.position.z = Math.random() * 150;
-	    leaf.rotation.z = Math.random() * Math.PI * 2;
-	    leaf.rotation.y = Math.random() * Math.PI * 2;
 	
-	    //set random size of leaf
-	    var s = 1 + Math.random() * 0.9;
+	    var s = 1 + Math.random() * 0.8;
 	    leaf.scale.set(s, s, s);
 	
 	    leaf.castShadow = true;
@@ -207,12 +199,10 @@
 	var leaves = void 0;
 	function createLeaves() {
 	  leaves = new Leaves();
-	  leaves.name = "leaves";
 	  leaves.mesh.position.x = -110;
 	  leaves.mesh.position.y = 130;
 	  leaves.mesh.position.z = -200;
 	  scene.add(leaves.mesh);
-	  // objects.push(leaves.mesh);
 	}
 	
 	var Mango = function Mango() {
@@ -236,8 +226,6 @@
 	  var loader = new THREE.TextureLoader();
 	  var mangoMap = loader.load("images/mangoMap.jpg");
 	  var mat = new THREE.MeshPhongMaterial({
-	    // color: 0xffd507,
-	    // shininess: 40,
 	    map: mangoMap
 	  });
 	  var mango = new THREE.Mesh(geom, mat);
@@ -249,18 +237,22 @@
 	
 	var mango = void 0;
 	function createMango() {
-	  pouring = false;
 	  mango = new Mango();
 	  mango.mesh.position.x = 55;
 	  mango.mesh.position.y = 95;
 	  mango.mesh.position.z = -145;
 	  scene.add(mango.mesh);
+	
+	  pouring = false;
 	}
 	
 	var WateringCan = function WateringCan() {
 	  var mergedCan = new THREE.Geometry();
 	  this.mesh = new THREE.Object3D();
-	  var mat = new THREE.MeshStandardMaterial({ metalness: 0.8, color: 0xadb2bd });
+	  var mat = new THREE.MeshStandardMaterial({
+	    metalness: 0.8,
+	    color: 0xadb2bd
+	  });
 	
 	  var geomCan = new THREE.CylinderGeometry(15, 15, 25, 10, 10);
 	  geomCan.applyMatrix(new THREE.Matrix4().makeScale(1.1, 1.0, 0.6));
@@ -424,7 +416,11 @@
 	
 	var plane = void 0;
 	function createPlane() {
-	  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, alphaTest: 0, visible: false }));
+	  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT, 8, 8), new THREE.MeshBasicMaterial({
+	    color: 0xffffff,
+	    alphaTest: 0,
+	    visible: false
+	  }));
 	  scene.add(plane);
 	}
 	
@@ -457,11 +453,13 @@
 	
 	  var mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
 	  raycaster.setFromCamera(mouse3D.clone(), camera);
+	
 	  if (selection) {
 	    var intersectPlane = raycaster.intersectObject(plane);
 	    selection.position.copy(intersectPlane[0].point);
 	  } else {
 	    var intersectedObjects = raycaster.intersectObjects(objects);
+	
 	    if (intersectedObjects.length > 0) {
 	      plane.position.copy(intersectedObjects[0].object.position);
 	      plane.lookAt(camera.position);
@@ -486,7 +484,8 @@
 	  var target = {
 	    x: mango.mesh.scale.x * 1.2,
 	    y: mango.mesh.scale.y * 1.2,
-	    z: mango.mesh.scale.z * 1.2 };
+	    z: mango.mesh.scale.z * 1.2
+	  };
 	  new TWEEN.Tween(mango.mesh.scale).to(target, 2000).easing(TWEEN.Easing.Bounce.Out).start();
 	}
 	
@@ -494,11 +493,11 @@
 	  var target = {
 	    x: mango.mesh.scale.x * 0.8,
 	    y: mango.mesh.scale.y * 0.8,
-	    z: mango.mesh.scale.z * 0.8 };
+	    z: mango.mesh.scale.z * 0.8
+	  };
 	  new TWEEN.Tween(mango.mesh.scale).to(target, 1000).easing(TWEEN.Easing.Elastic.In).start();
 	}
 	
-	// CREATE LOOP SO IT RENDERS
 	var tick = 0;
 	function loop() {
 	  requestAnimationFrame(loop);
@@ -509,21 +508,22 @@
 	    tick += delta;
 	
 	    if (tick < 0) tick = 0;
-	    particleGroup.position.x = objects[0].children[0].position.x + 88;
+	    particleGroup.position.x = objects[0].children[0].position.x + 92;
 	    particleGroup.position.y = objects[0].children[0].position.y - 14;
+	    particleGroup.position.z = objects[0].children[0].position.z;
 	    particleGroup.dynamic = true;
 	    if (delta > 0) {
 	      for (var i = 0; i < spawnerOptions.spawnRate * delta; i++) {
 	        particleGroup.spawnParticle(options);
 	      }
 	    }
-	
 	    particleGroup.update(tick);
 	  }
 	
 	  if (pouring) {
 	    increaseMangoSize();
 	  }
+	
 	  TWEEN.update();
 	  renderer.render(scene, camera);
 	}
