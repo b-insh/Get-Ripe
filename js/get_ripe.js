@@ -6,6 +6,7 @@ function init() {
   createLeaves();
   createMango();
   createWateringCan();
+  createSun();
 
   loop();
 }
@@ -155,6 +156,7 @@ function createLeaves() {
   leaves.mesh.position.y = 130;
   leaves.mesh.position.z = -200;
   scene.add(leaves.mesh);
+  // objects.push(leaves.mesh);
 }
 
 const Mango = function() {
@@ -178,16 +180,12 @@ const Mango = function() {
   const loader = new THREE.TextureLoader();
   const mangoMap = loader.load("images/mangoMap.jpg");
   const mat = new THREE.MeshPhongMaterial({
-    color: 0xffd507,
-    shininess: 40,
+    // color: 0xffd507,
+    // shininess: 40,
     map: mangoMap,
   });
   const mango = new THREE.Mesh(geom, mat);
 
-  // const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  // domEvents.addEventListener(mango, 'click', function increaseMangoSize(e) {
-  //   mango.scale.multiplyScalar(1.1);
-  // });
   mango.castShadow = true;
   mango.recieveShadow = true;
   this.mesh.add(mango);
@@ -245,10 +243,82 @@ function createWateringCan() {
   wateringCan.mesh.position.z = -10;
 
   const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  domEvents.addEventListener(wateringCan.mesh, 'click', () => createParticles());
+  domEvents.addEventListener(wateringCan.mesh, 'click', () => toggleParticles());
 
   scene.add(wateringCan.mesh);
   objects.push(wateringCan.mesh);
+}
+
+const Sun = function() {
+  const sunshine = new THREE.Geometry();
+  this.mesh = new THREE.Object3D();
+
+  const starGeom = new THREE.SphereGeometry(30, 10, 10);
+  // const surface = new THREE.MeshPhongMaterial({
+  //   color: 0xffcc33,
+  //   emissive: 0xffeaad,
+  //   emissiveIntensity: 0.4,
+  //   shininess: 10,
+  // });
+  const surface = new THREEx.createAtmosphereMaterial();
+  const star = new THREE.Mesh(starGeom);
+
+  const sunlight = new THREE.PointLight(0xffffff, 5, 1000);
+  star.add(sunlight);
+
+  star.updateMatrix();
+  sunshine.merge(star.geometry, star.matrix);
+  sunshine.castShadow = true;
+  sunshine.receiveShadow = false;
+
+  const sun3D = new THREE.Mesh(sunshine, surface);
+  this.mesh.add(sun3D);
+
+};
+
+let sun;
+function createSun() {
+  sun = new Sun();
+  sun.mesh.position.x = -220;
+  sun.mesh.position.y = 220;
+
+  const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+  domEvents.addEventListener(sun.mesh, 'click', () => toggleSunlight());
+
+  scene.add(sun.mesh);
+}
+
+let spotLight;
+function createSunlight() {
+  spotLight = new THREE.SpotLight( 0xfffff );
+  spotLight.position.set( -220, 220, 0);
+  spotLight.castShadow = true;
+
+  scene.add(spotLight);
+}
+
+let shining = true;
+function toggleSunlight() {
+  if (shining) {
+    createSunlight();
+    decreaseMangoSize();
+    shining = false;
+  } else {
+    scene.remove(spotLight);
+    shining = true;
+  }
+}
+
+let pourWater = true;
+function toggleParticles() {
+  if (pourWater) {
+    createParticles();
+    pourWater = false;
+  }
+  else {
+    scene.remove(particleGroup);
+    pourWater = true;
+  }
 }
 
 let particleGroup, options, spawnerOptions, pouring = false;
@@ -263,7 +333,7 @@ function createParticles() {
     position: new THREE.Vector3(),
     positionRandomness: 1,
     velocity: new THREE.Vector3(),
-    velocityRandomness: 1,
+    velocityRandomness: 6,
     color: 0x40a4df,
     colorRandomness: 0.4,
     turbulence: 1,
@@ -273,12 +343,13 @@ function createParticles() {
   };
 
   spawnerOptions = {
-    spawnRate: 15000,
-    horizontalSpeed: 1.5,
+    spawnRate: 25000,
+    horizontalSpeed: 3,
     verticalSpeed: 0.3,
-    timeScale: 1
+    timeScale: 1.2
   };
 }
+
 
 let plane;
 function createPlane() {
@@ -314,8 +385,6 @@ function onDocumentMouseMove(e) {
   const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
 
   const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
-  // mouse3D.unproject(camera);
-  // raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
   raycaster.setFromCamera( mouse3D.clone(), camera);
   if (selection) {
     const intersectPlane = raycaster.intersectObject(plane);
@@ -335,9 +404,35 @@ function onDocumentMouseUp(e) {
 
 function increaseMangoSize() {
   pouring = false;
-  sleep(2);
-  // geom.applyMatrix( new THREE.Matrix4().makeScale(1.0, 1.3, 0.6));
-  mango.mesh.scale.set(1.2, 1.2, 1.2);
+  window.setTimeout( scaleUp, 1000 );
+}
+
+function decreaseMangoSize() {
+  window.setTimeout( scaleDown, 1000);
+}
+
+function scaleUp() {
+  const target = {
+    x: (mango.mesh.scale.x * 1.2),
+    y: (mango.mesh.scale.y * 1.2),
+    z: (mango.mesh.scale.z * 1.2) };
+  new TWEEN
+    .Tween( mango.mesh.scale )
+    .to( target, 2000 )
+    .easing( TWEEN.Easing.Bounce.Out )
+    .start();
+}
+
+function scaleDown() {
+  const target = {
+    x: (mango.mesh.scale.x * 0.8),
+    y: (mango.mesh.scale.y * 0.8),
+    z: (mango.mesh.scale.z * 0.8) };
+    new TWEEN
+      .Tween( mango.mesh.scale )
+      .to( target, 1000 )
+      .easing( TWEEN.Easing.Elastic.In )
+      .start();
 }
 
 // CREATE LOOP SO IT RENDERS
@@ -352,14 +447,14 @@ function loop() {
 
 
     if (tick < 0) tick = 0;
-    particleGroup.position.x = wateringCan.mesh.position.x - 30;
-    particleGroup.position.y = wateringCan.mesh.position.y + 17;
-    particleGroup.dynamic = true;
-    if (delta > 0) {
-      for (let i = 0; i < spawnerOptions.spawnRate * delta; i++) {
-        particleGroup.spawnParticle(options);
+      particleGroup.position.x = objects[0].children[0].position.x + 88;
+      particleGroup.position.y = objects[0].children[0].position.y - 14;
+      particleGroup.dynamic = true;
+      if (delta > 0) {
+        for (let i = 0; i < spawnerOptions.spawnRate * delta; i++) {
+          particleGroup.spawnParticle(options);
+        }
       }
-    }
 
     particleGroup.update(tick);
   }
@@ -367,6 +462,7 @@ function loop() {
   if (pouring) {
     increaseMangoSize();
   }
+  TWEEN.update();
   renderer.render(scene, camera);
 }
 
