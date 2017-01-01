@@ -86,7 +86,6 @@ function createLights() {
 
 	scene.add(hemisphereLight);
 	scene.add(shadowLight);
-
 }
 
 let objects = [];
