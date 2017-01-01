@@ -250,42 +250,46 @@ function createWateringCan() {
 }
 
 const Sun = function() {
-  const sunshine = new THREE.Geometry();
   this.mesh = new THREE.Object3D();
 
-  const starGeom = new THREE.SphereGeometry(30, 10, 10);
-  // const surface = new THREE.MeshPhongMaterial({
-  //   color: 0xffcc33,
-  //   emissive: 0xffeaad,
-  //   emissiveIntensity: 0.4,
-  //   shininess: 10,
-  // });
-  const surface = new THREEx.createAtmosphereMaterial();
-  const star = new THREE.Mesh(starGeom);
+  const sunGeom = new THREE.SphereGeometry(30, 10, 10);
+  const sunMat = new THREE.MeshPhongMaterial({
+    color: 0xffcc33,
+    emissive: 0xffeaad,
+    emissiveIntensity: 0.4,
+    shininess: 10,
+  });
 
-  const sunlight = new THREE.PointLight(0xffffff, 5, 1000);
-  star.add(sunlight);
+  const sun = new THREE.Mesh(sunGeom, sunMat);
 
-  star.updateMatrix();
-  sunshine.merge(star.geometry, star.matrix);
-  sunshine.castShadow = true;
-  sunshine.receiveShadow = false;
-
-  const sun3D = new THREE.Mesh(sunshine, surface);
-  this.mesh.add(sun3D);
-
+  sun.castShadow = true;
+  sun.receiveShadow = true;
+  this.mesh.add(sun);
 };
 
-let sun;
+const Glow = function() {
+  this.mesh = new THREE.Object3D();
+
+  const glowGeom = new THREE.SphereGeometry(42, 10, 10);
+  const glowMat = new THREEx.createAtmosphereMaterial();
+  const glow = new THREE.Mesh(glowGeom, glowMat);
+  this.mesh.add(glow);
+};
+
+let sun, glow;
 function createSun() {
   sun = new Sun();
+  glow = new Glow();
   sun.mesh.position.x = -220;
   sun.mesh.position.y = 220;
+  glow.mesh.position.x = -220;
+  glow.mesh.position.y = 220;
 
   const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
   domEvents.addEventListener(sun.mesh, 'click', () => toggleSunlight());
 
   scene.add(sun.mesh);
+  scene.add(glow.mesh);
 }
 
 let spotLight;
