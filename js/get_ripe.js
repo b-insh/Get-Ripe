@@ -378,10 +378,6 @@ function onDocumentMouseMove(e) {
 
   if (selection) {
     const intersectPlane = raycaster.intersectObject(plane);
-    console.log("selection pos");
-    console.log(selection.position);
-    console.log("intersectPlane");
-    console.log(intersectPlane[0].point);
     selection.position.copy(intersectPlane[0].point);
     selection.position.x -= 120;
     selection.position.y += 40;
