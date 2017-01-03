@@ -56,7 +56,6 @@ function createScene() {
   document.addEventListener('mousedown', onDocumentMouseDown, false);
   document.addEventListener('mousemove', onDocumentMouseMove, false);
   document.addEventListener('mouseup', onDocumentMouseUp, false);
-
 }
 
 function handleWindowResize() {
@@ -364,34 +363,16 @@ function createPlane() {
 let selection;
 function onDocumentMouseDown(e) {
   e.preventDefault();
-  // get mouse position
-  // const mouseX = (e.clientX / WIDTH) * 2 - 1;
-  // const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
-  // // get 3D vector from 3D mouse position using unproject function
-  // const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
-  // mouse3D.unproject(camera);
-  // // set raycaster position
-  // raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
   mouse.set( ( e.clientX / WIDTH ) * 2 - 1, -( e.clientY / HEIGHT ) * 2 + 1 );
   raycaster.setFromCamera( mouse, camera );
-  // find intersected objects
-  const intersectedObjects = raycaster.intersectObjects(objects, true); // returns array sorted by distance
+  const intersectedObjects = raycaster.intersectObjects(objects, true);
   if (intersectedObjects.length > 0) {
-    // grab the closest object
     selection = intersectedObjects[0].object;
-    // calculate the offset
-    // const intersectPlane = raycaster.intersectObject(plane);
-    // offset.copy(intersectPlane[0].point).sub(plane.position);
   }
 }
 
 function onDocumentMouseMove(e) {
   e.preventDefault();
-  // const mouseX = (e.clientX / WIDTH) * 2 - 1;
-  // const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
-  //
-  // const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
-  // raycaster.setFromCamera( mouse3D.clone(), camera);
   mouse.set( ( e.clientX / WIDTH ) * 2 - 1, -( e.clientY / HEIGHT ) * 2 + 1 );
   raycaster.setFromCamera( mouse, camera );
 
@@ -412,7 +393,6 @@ function onDocumentMouseMove(e) {
       plane.lookAt(camera.position);
     }
   }
-
 }
 
 function onDocumentMouseUp(e) {
