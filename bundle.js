@@ -495,9 +495,9 @@
 	    tick += delta;
 	
 	    if (tick < 0) tick = 0;
-	    particleGroup.position.x = objects[0].children[0].position.x + 92;
+	    particleGroup.position.x = objects[0].children[0].position.x + 90;
 	    particleGroup.position.y = objects[0].children[0].position.y - 14;
-	    particleGroup.position.z = objects[0].children[0].position.z;
+	    particleGroup.position.z = objects[0].children[0].position.z - 10;
 	    particleGroup.dynamic = true;
 	    if (delta > 0) {
 	      for (var i = 0; i < spawnerOptions.spawnRate * delta; i++) {
