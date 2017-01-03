@@ -12,7 +12,8 @@ function init() {
 }
 
 // CREATE SCENE
-let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, raycaster, offset, clock;
+let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, clock, raycaster, mouse;
+
 
 function createScene() {
   HEIGHT = window.innerHeight;
@@ -43,8 +44,10 @@ function createScene() {
   });
 
   renderer.setSize(WIDTH, HEIGHT);
-
   renderer.shadowMap.enabled = true;
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
 
   container = document.getElementById('world');
   container.appendChild(renderer.domElement);
@@ -54,8 +57,6 @@ function createScene() {
   document.addEventListener('mousemove', onDocumentMouseMove, false);
   document.addEventListener('mouseup', onDocumentMouseUp, false);
 
-  raycaster = new THREE.Raycaster();
-  offset = new THREE.Vector3();
 }
 
 function handleWindowResize() {
@@ -352,7 +353,7 @@ function createParticles() {
 
 let plane;
 function createPlane() {
-  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT, 8, 8), new THREE.MeshBasicMaterial({
+  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT), new THREE.MeshBasicMaterial({
     color: 0xffffff,
     alphaTest: 0,
     visible: false
@@ -364,35 +365,45 @@ let selection;
 function onDocumentMouseDown(e) {
   e.preventDefault();
   // get mouse position
-  const mouseX = (e.clientX / WIDTH) * 2 - 1;
-  const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
-  // get 3D vector from 3D mouse position using unproject function
-  const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
-  mouse3D.unproject(camera);
-  // set raycaster position
-  raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
+  // const mouseX = (e.clientX / WIDTH) * 2 - 1;
+  // const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
+  // // get 3D vector from 3D mouse position using unproject function
+  // const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
+  // mouse3D.unproject(camera);
+  // // set raycaster position
+  // raycaster.set(camera.position, mouse3D.sub(camera.position).normalize());
+  mouse.set( ( e.clientX / WIDTH ) * 2 - 1, -( e.clientY / HEIGHT ) * 2 + 1 );
+  raycaster.setFromCamera( mouse, camera );
   // find intersected objects
   const intersectedObjects = raycaster.intersectObjects(objects, true); // returns array sorted by distance
   if (intersectedObjects.length > 0) {
     // grab the closest object
     selection = intersectedObjects[0].object;
     // calculate the offset
-    const intersectPlane = raycaster.intersectObject(plane);
-    offset.copy(intersectPlane[0].point).sub(plane.position);
+    // const intersectPlane = raycaster.intersectObject(plane);
+    // offset.copy(intersectPlane[0].point).sub(plane.position);
   }
 }
 
 function onDocumentMouseMove(e) {
   e.preventDefault();
-  const mouseX = (e.clientX / WIDTH) * 2 - 1;
-  const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
-
-  const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
-  raycaster.setFromCamera( mouse3D.clone(), camera);
+  // const mouseX = (e.clientX / WIDTH) * 2 - 1;
+  // const mouseY = -(e.clientY / HEIGHT) * 2 + 1;
+  //
+  // const mouse3D = new THREE.Vector3(mouseX, mouseY, 0.5);
+  // raycaster.setFromCamera( mouse3D.clone(), camera);
+  mouse.set( ( e.clientX / WIDTH ) * 2 - 1, -( e.clientY / HEIGHT ) * 2 + 1 );
+  raycaster.setFromCamera( mouse, camera );
 
   if (selection) {
     const intersectPlane = raycaster.intersectObject(plane);
+    console.log("selection pos");
+    console.log(selection.position);
+    console.log("intersectPlane");
+    console.log(intersectPlane[0].point);
     selection.position.copy(intersectPlane[0].point);
+    selection.position.x -= 120;
+    selection.position.y += 40;
   } else {
     const intersectedObjects = raycaster.intersectObjects(objects);
 
@@ -401,6 +412,7 @@ function onDocumentMouseMove(e) {
       plane.lookAt(camera.position);
     }
   }
+
 }
 
 function onDocumentMouseUp(e) {
