@@ -13,10 +13,19 @@ Get Ripe is an interactive 3D environment populated by a tree with a mango, a wa
 
 ### Technologies Used
 
-* JavaScript
 * Three.js
 * Tween.js
+* TweenLite.js
+* JavaScript
 * CSS
+
+I chose to use the Three.js library because I was interested in having an interactive environment. I also looked into using Paper, Easel, and Canvas for my game but building and manipulating 3D objects was very appealing to me and something I had never worked with before. I wanted to explore and see what I could do with something new.
+
+I looked through a lot of the Three.js documentation previous to beginning this project and realized that there was not a lot of it. I knew I would have to figure out a lot of the functionality on my own which was very rewarding. Additionally I looked into a lot of other people's projects created using Three.js and was very impressed with sheer amount of amazing things that the library helped create and knew that it was a library I wanted to be familiar with.
+
+Three made it easy to create and manipulate 3D objects and place them into a 3D environment that can be manipulated in a variety of ways. The lighting and camera position are completely up to the creator making it relatively simple to achieve a huge variety of scene basics. Three also has a built in GPU particle system which was particularly interesting to me as I knew that I wanted to have pouring water in my scene. Having the GPU calculate the particle re-rendering makes my scene render much faster and smoother than if the CPU had to make all of those calculations.
+
+I also needed a way to smoothly animate the objects in my scene and chose to incorporate Tween.js and TweenLite.js in my project. Tween takes in the starting position or values of the object and the ending values that you want, and provides the animation for the object between those values. When my animations became more complicated, I used a TweenLite timeline which allows greater flexibility in manipulating when and how animations fire.
 
 ### Feature Implementations
 
@@ -28,7 +37,7 @@ First I created a transparent 3D plane that lays across my entire page. I placed
 
 So now I had a way to give my mouse 3D access, but I needed to have it be able to grab objects and drop them elsewhere in the scene.
 
-I placed all the objects I wanted to be able to move into an array. In my `mousedown` callback, I fed the objects to the raycaster and had it check to see if it's ray had intersected with any of them after passing through the plane. I then made the first element of that result my 'selection'.
+I placed all the objects I wanted to be able to move into an array. In my `mousedown` callback, I fed the objects to the raycaster and had it check to see if its ray had intersected with any of them after passing through the plane. I then made the first element of that result, the closest one, my 'selection'.
 
 I created another document event listener on `mousemove` that found the mouse's location in relation to the plane again. I set the selected object's position to the intersection point of the ray and the mouse allowing the object to move as the mouse moves.
 
@@ -75,7 +84,7 @@ I created the water pouring from the watering can using a `GPUParticleSystem`. I
 
 In my animation loop I update the position of the entire particle group as well as the spawning and death of the particles themselves according to the parameters I gave it on construction.
 
-A problem that I had initially was updating the position of the particle system if the watering can was being dragged and dropped while the particles were turned on. I had originally set the particle system's position to correspond to the watering can's mesh, or blueprint, but quickly learned that the blueprint stays in the same place permanently while the actual object moves around the scene. I had to look back into my raycaster at the object is was intersecting with on drag and drop and set the particle system's position to that instead.
+A problem that I had initially was updating the position of the particle system if the watering can was being dragged and dropped while the particles were turned on. I had originally set the particle system's position to correspond to the watering can's mesh, or blueprint, but quickly learned that the blueprint stays in the same place permanently while the actual object moves around the scene. I had to look back into my raycaster at the object it was intersecting with on drag and drop and set the particle system's position equal to those values instead. Now it follows the watering can around the scene like a charm!
 
 ```javascript
 let delta = clock.getDelta() * spawnerOptions.timeScale;
@@ -131,7 +140,7 @@ Another issue I had was having the mango continue to grow, or continue to shrink
 
 To handle the transition of the mango between sizes, I used Tween.js which creates an object that moves be"tween" the initial and target values it is given. I chained an easing method with animation onto the Tween object and the mango now shrinks and grows smoothly.
 
-As for having the mango continuously grow and shrink based on its current size, I decided to keep a reference to the mango's current size inside of the target value I gave to the Tween. With this implementation the mango changes size based on the size it is at the time the grow or shrink is triggered.
+As for having the mango continuously grow and shrink based on its current size, I decided to keep a reference to the mango's current size inside of the target value I gave to the Tween. With this implementation the mango changes size based on the size it is at the time the size change is triggered.
 
 ```javascript
 function increaseMangoSize() {
@@ -178,4 +187,4 @@ Users should be able to choose from a wider variety of tools to manipulate the s
 
 #### Create World
 
-Construct an entire 'world', for example, a park or backyard that users can navigate through to find a variety of scenes. 
+Construct an entire 'world', for example, a park or backyard that users can navigate through to find a variety of scenes.
