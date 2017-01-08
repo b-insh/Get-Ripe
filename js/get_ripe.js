@@ -438,7 +438,6 @@ function scaleDown() {
 }
 
 function fallOff() {
-  // debugger
   if (!pourWater) { toggleParticles(); }
   domEvents.removeEventListener(wateringCan.mesh, 'click', toggleParticles);
 
@@ -483,13 +482,14 @@ function randomDirs() {
 function rollAway() {
   const timeline = new TimelineLite();
   let rollingDirs = randomDirs();
+  let rollingTarget = { x: rollingDirs[2] };
   let positionTarget = {
     x: mango.mesh.position.x + rollingDirs[0],
     z: mango.mesh.position.z + rollingDirs[1],
     ease: Power1.easeOut,
   };
 
-  let rotate = new TweenLite(mango.mesh.rotation, 1, { x: rollingDirs[2] } );
+  let rotate = new TweenLite(mango.mesh.rotation, 1, rollingTarget );
   let roll = new TweenLite(mango.mesh.position, 1, positionTarget );
 
   timeline.add(rotate).add(roll, 0);
@@ -499,7 +499,6 @@ function rollAway() {
 function newMango() {
   createMango();
   domEvents.addEventListener(wateringCan.mesh, 'click', toggleParticles);
-  // debugger
 }
 
 let tick = 0;
