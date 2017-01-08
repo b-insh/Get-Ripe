@@ -12,7 +12,7 @@ function init() {
 }
 
 // CREATE SCENE
-let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, clock, raycaster, mouse;
+let scene, camera, fieldOfView, aspectRatio, HEIGHT, WIDTH, renderer, container, nearPlane, farPlane, clock, raycaster, mouse, domEvents;
 
 
 function createScene() {
@@ -45,15 +45,17 @@ function createScene() {
 
   renderer.setSize(WIDTH, HEIGHT);
   renderer.shadowMap.enabled = true;
+  renderer.setPixelRatio( window.devicePixelRatio );
 
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
+  domEvents = new THREEx.DomEvents(camera, renderer.domElement);
 
   container = document.getElementById('world');
   container.appendChild(renderer.domElement);
 
   window.addEventListener('resize', handleWindowResize, false);
-  document.addEventListener('mousedown', onDocumentMouseDown, false);
+  document.addEventListener('mousedown', onDocumentMouseDown);
   document.addEventListener('mousemove', onDocumentMouseMove, false);
   document.addEventListener('mouseup', onDocumentMouseUp, false);
 }
@@ -92,7 +94,7 @@ let objects = [];
 const Tree = function() {
   this.mesh = new THREE.Object3D();
 
-  const geomTrunk = new THREE.CylinderGeometry(25, 50, 320, 20, 10);
+  const geomTrunk = new THREE.CylinderGeometry(20, 30, 320, 20, 10);
   const matTrunk = new THREE.MeshStandardMaterial({
     color: 0x751f1a,
     roughness: 0.7,
@@ -163,7 +165,7 @@ const Mango = function() {
     face.vertexNormals[2].copy( geom.vertices[face.c] ).normalize();
   }
 
-  geom.applyMatrix( new THREE.Matrix4().makeScale(1.0, 1.3, 0.6));
+  geom.applyMatrix( new THREE.Matrix4().makeScale(1.0, 1.3, 0.8));
 
   const loader = new THREE.TextureLoader();
   const mangoMap = loader.load("images/mangoMap.jpg");
@@ -232,8 +234,7 @@ function createWateringCan() {
   wateringCan.mesh.position.y = -30;
   wateringCan.mesh.position.z = -10;
 
-  const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  domEvents.addEventListener(wateringCan.mesh, 'click', () => toggleParticles());
+  domEvents.addEventListener(wateringCan.mesh, 'click', toggleParticles);
 
   scene.add(wateringCan.mesh);
   objects.push(wateringCan.mesh);
@@ -275,10 +276,10 @@ let sun, glow;
 function createSun() {
   sun = new Sun();
   glow = new Glow();
-  sun.mesh.position.x = -220;
-  sun.mesh.position.y = 220;
-  glow.mesh.position.x = -220;
-  glow.mesh.position.y = 220;
+  sun.mesh.position.x = -320;
+  sun.mesh.position.y = 260;
+  glow.mesh.position.x = -320;
+  glow.mesh.position.y = 260;
 
   const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
   domEvents.addEventListener(sun.mesh, 'click', () => toggleSunlight());
@@ -406,15 +407,20 @@ function decreaseMangoSize() {
 
 function scaleUp() {
   const target = {
-    x: (mango.mesh.scale.x * 1.2),
-    y: (mango.mesh.scale.y * 1.2),
-    z: (mango.mesh.scale.z * 1.2)
+    x: (mango.mesh.scale.x * 1.11),
+    y: (mango.mesh.scale.y * 1.1),
+    z: (mango.mesh.scale.z * 1.1)
   };
+
   new TWEEN
     .Tween( mango.mesh.scale )
     .to( target, 2000 )
     .easing( TWEEN.Easing.Bounce.Out )
     .start();
+
+  if (mango.mesh.scale.x > 1.6) {
+    fallOff();
+  }
 }
 
 function scaleDown() {
@@ -423,11 +429,77 @@ function scaleDown() {
     y: (mango.mesh.scale.y * 0.8),
     z: (mango.mesh.scale.z * 0.8)
   };
+
     new TWEEN
       .Tween( mango.mesh.scale )
       .to( target, 1000 )
       .easing( TWEEN.Easing.Elastic.In )
       .start();
+}
+
+function fallOff() {
+  // debugger
+  if (!pourWater) { toggleParticles(); }
+  domEvents.removeEventListener(wateringCan.mesh, 'click', toggleParticles);
+
+  const target = { y: -140 };
+
+  new TWEEN
+    .Tween( mango.mesh.position )
+    .to( target, 500 )
+    .easing( TWEEN.Easing.Quartic.In )
+    .onComplete( fallOver )
+    .start();
+}
+
+function fallOver() {
+  const target = {
+    x: 1.5,
+    z: -1
+  };
+
+  new TWEEN
+    .Tween( mango.mesh.rotation )
+    .to( target, 750 )
+    .easing( TWEEN.Easing.Quartic.In )
+    .onComplete( rollAway )
+    .start();
+
+  mango.mesh.updateMatrix();
+}
+
+function randomDirs() {
+  let xDir = Math.floor(Math.random() * 300) + 1;
+  xDir *= Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+  xDir += xDir < 0 ? -200 : 200;
+  let zDir = Math.floor(Math.random() * 60) + 1;
+  zDir *= Math.floor(Math.random() * 2) == 1 ? -1 : -1;
+  zDir += zDir < 0 ? -100 : 100;
+  let rotation = Math.floor(Math.random() * 25);
+
+  return [xDir, zDir, rotation];
+}
+
+function rollAway() {
+  const timeline = new TimelineLite();
+  let rollingDirs = randomDirs();
+  let positionTarget = {
+    x: mango.mesh.position.x + rollingDirs[0],
+    z: mango.mesh.position.z + rollingDirs[1],
+    ease: Power1.easeOut,
+  };
+
+  let rotate = new TweenLite(mango.mesh.rotation, 1, { x: rollingDirs[2] } );
+  let roll = new TweenLite(mango.mesh.position, 1, positionTarget );
+
+  timeline.add(rotate).add(roll, 0);
+  window.setTimeout( newMango, 2000 );
+}
+
+function newMango() {
+  createMango();
+  domEvents.addEventListener(wateringCan.mesh, 'click', toggleParticles);
+  // debugger
 }
 
 let tick = 0;
