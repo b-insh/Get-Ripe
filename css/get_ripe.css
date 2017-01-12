@@ -1,3 +1,7 @@
+body, p {
+  margin: 0;
+}
+
 #world {
   position: absolute;
   width: 100%;
@@ -6,23 +10,37 @@
   /*background: linear-gradient(#bae4e0, #e4e0ba);*/
   background-image: url('../images/backdrop.png');
   background-size: 100% 175%;
+  opacity: 0.9;
 }
 
+@font-face {
+  font-family: 'plantslettersregular';
+  src: url('../plants-font/plantsletters-webfont.woff2') format('woff2'),
+       url('../plants-font/plantsletters-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
 
 .instructions {
   display: block;
-  width: 250px;
+  width: 550px;
   position: absolute;
-  bottom: 0;
-  margin: 10px;
-
+  top: 0;
+  right: 0;
+  margin-right: 10px;
   font-family: "Open Sans", sans-serif;
-  font-size: 16px;
+  font-size: 18px;
+  text-align: center;
 }
 
 .get-ripe {
   display: block;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  margin: 0 auto;
+
+  font-family: "plantslettersregular", sans-serif;
   font-weight: normal;
-  font-size: 22px;
-  margin-bottom: 10px;
+  font-size: 80px;
+  text-align: center;
 }
