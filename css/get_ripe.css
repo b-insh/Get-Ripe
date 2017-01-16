@@ -75,7 +75,7 @@ body, div, section, span, ul, li, a {
   color: #24361e;
 }
 
-.link:hover {
+.buttons li:hover {
   background: #cddbc9;
 }
 
