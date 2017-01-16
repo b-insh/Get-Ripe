@@ -508,7 +508,7 @@
 	    z: -1
 	  };
 	
-	  new TWEEN.Tween(mango.mesh.rotation).to(target, 750).easing(TWEEN.Easing.Quartic.In).onComplete(rollAway).start();
+	  new TWEEN.Tween(mango.mesh.rotation).to(target, 500).easing(TWEEN.Easing.Quartic.In).onComplete(rollAway).start();
 	
 	  mango.mesh.updateMatrix();
 	}
@@ -520,7 +520,7 @@
 	  var zDir = Math.floor(Math.random() * 60) + 1;
 	  zDir *= Math.floor(Math.random() * 2) == 1 ? -1 : -1;
 	  zDir += zDir < 0 ? -100 : 100;
-	  var rotation = Math.floor(Math.random() * 25);
+	  var rotation = Math.floor(Math.random() * 25) + 5;
 	
 	  return [xDir, zDir, rotation];
 	}

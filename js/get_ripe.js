@@ -459,7 +459,7 @@ function fallOver() {
 
   new TWEEN
     .Tween( mango.mesh.rotation )
-    .to( target, 750 )
+    .to( target, 500 )
     .easing( TWEEN.Easing.Quartic.In )
     .onComplete( rollAway )
     .start();
@@ -474,7 +474,7 @@ function randomDirs() {
   let zDir = Math.floor(Math.random() * 60) + 1;
   zDir *= Math.floor(Math.random() * 2) == 1 ? -1 : -1;
   zDir += zDir < 0 ? -100 : 100;
-  let rotation = Math.floor(Math.random() * 25);
+  let rotation = Math.floor(Math.random() * 25) + 5;
 
   return [xDir, zDir, rotation];
 }
