@@ -74,6 +74,10 @@ body, div, section, span, ul, li, a {
   color: #24361e;
 }
 
+.buttons li:hover {
+  background: #cddbc9;
+}
+
 .instructions {
   font-size: 12px;
   text-align: center;
