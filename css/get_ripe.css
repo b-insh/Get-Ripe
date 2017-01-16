@@ -34,21 +34,22 @@ body, div, section, span, ul, li, a {
 }
 
 .get-ripe {
-  display: block;
-  width: 480px;
-
   font-family: "plantslettersregular", sans-serif;
   font-weight: normal;
   font-size: 80px;
   text-align: center;
+
+  display: block;
+  width: 480px;
 }
 
 .author {
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
-  margin: -5px auto 0 auto;
+
   display: block;
   width: 120px;
+  margin: -5px auto 0 auto;
 }
 
 .buttons {
