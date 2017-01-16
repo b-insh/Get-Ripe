@@ -1,5 +1,11 @@
-body, p {
+body, div, section, span, ul, li, a {
   margin: 0;
+  padding: 0;
+  outline: 0;
+  border: 0;
+
+  list-style: none;
+  text-decoration: none;
 }
 
 #world {
@@ -7,7 +13,6 @@ body, p {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /*background: linear-gradient(#bae4e0, #e4e0ba);*/
   background-image: url('../images/backdrop.png');
   background-size: 100% 175%;
   opacity: 0.9;
@@ -21,26 +26,94 @@ body, p {
   font-style: normal;
 }
 
-.instructions {
-  display: block;
-  width: 550px;
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-right: 10px;
-  font-family: "Open Sans", sans-serif;
-  font-size: 18px;
-  text-align: center;
+.text {
+  position: relative;
+  float: right;
+  width: 480px;
+  height: 250px;
 }
 
 .get-ripe {
   display: block;
-  margin-bottom: 20px;
-  margin-right: 10px;
-  margin: 0 auto;
+  width: 480px;
 
   font-family: "plantslettersregular", sans-serif;
   font-weight: normal;
   font-size: 80px;
   text-align: center;
+}
+
+.author {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  margin: -5px auto 0 auto;
+  display: block;
+  width: 120px;
+}
+
+.buttons {
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+
+  width: 390px;
+  margin: 0 auto;
+}
+
+.buttons li {
+  float: left;
+  color: #24361e;
+  margin: 5px 10px 0 10px;;
+  cursor: pointer;
+  background: #adc3a6;
+  opacity: 0.6;
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+.buttons li a {
+  color: #24361e;
+}
+
+.instructions {
+  font-size: 12px;
+  text-align: center;
+
+  background: #fff;
+  padding: 3px;
+
+  opacity: 0;
+  width: 200px;
+  margin-right: 10px;
+  border-radius: 6px;
+
+  position: absolute;
+  top: 30px;
+  right: -65px;
+
+  pointer-events: none;
+}
+
+.instructions:after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #fff transparent;
+}
+
+.instructions-link {
+  position: relative;
+}
+
+.instructions-link:hover .instructions {
+  opacity: 0.9;
+}
+
+.group:after {
+  content: "";
+  clear: both;
+  display: block;
 }
