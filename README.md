@@ -27,7 +27,7 @@ Three made it easy to create and manipulate 3D objects and place them into a 3D 
 
 I also needed a way to smoothly animate the objects in my scene and chose to incorporate Tween.js and TweenLite.js in my project. Tween takes in the starting position or values of the object and the ending values that you want, and provides the animation for the object between those values. When my animations became more complicated, I used a TweenLite timeline which allows greater flexibility in manipulating when and how animations fire.
 
-![site gif](app/images/GetRipe.gif)
+![GetRipe](b-insh.github.com/Get-Ripe/images/GetRipe.gif)
 
 ### Feature Implementations
 
