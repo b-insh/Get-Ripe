@@ -471,9 +471,11 @@ function randomDirs() {
   let xDir = Math.floor(Math.random() * 300) + 1;
   xDir *= Math.floor(Math.random() * 2) == 1 ? 1 : -1;
   xDir += xDir < 0 ? -200 : 200;
+
   let zDir = Math.floor(Math.random() * 60) + 1;
   zDir *= Math.floor(Math.random() * 2) == 1 ? -1 : -1;
   zDir += zDir < 0 ? -100 : 100;
+  
   let rotation = Math.floor(Math.random() * 25) + 5;
 
   return [xDir, zDir, rotation];
