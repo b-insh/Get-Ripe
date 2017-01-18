@@ -282,7 +282,7 @@ function createSun() {
   glow.mesh.position.y = 260;
 
   const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-  domEvents.addEventListener(sun.mesh, 'click', () => toggleSunlight());
+  domEvents.addEventListener(sun.mesh, 'click', toggleSunlight);
 
   scene.add(sun.mesh);
   scene.add(glow.mesh);
@@ -303,6 +303,7 @@ function toggleSunlight() {
     createSunlight();
     decreaseMangoSize();
     shining = false;
+    window.setTimeout(toggleSunlight, 2000);
   } else {
     scene.remove(sunlight);
     shining = true;
@@ -314,11 +315,13 @@ function toggleParticles() {
   if (pourWater) {
     createParticles();
     pourWater = false;
+    window.setTimeout( removeParticles, 2000);
   }
-  else {
-    scene.remove(particleGroup);
-    pourWater = true;
-  }
+}
+
+function removeParticles() {
+  scene.remove(particleGroup);
+  pourWater = true;
 }
 
 let particleGroup, options, spawnerOptions, pouring = false;
@@ -475,7 +478,7 @@ function randomDirs() {
   let zDir = Math.floor(Math.random() * 60) + 1;
   zDir *= Math.floor(Math.random() * 2) == 1 ? -1 : -1;
   zDir += zDir < 0 ? -100 : 100;
-  
+
   let rotation = Math.floor(Math.random() * 25) + 5;
 
   return [xDir, zDir, rotation];

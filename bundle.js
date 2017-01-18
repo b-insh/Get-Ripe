@@ -341,9 +341,7 @@
 	  glow.mesh.position.y = 260;
 	
 	  var domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-	  domEvents.addEventListener(sun.mesh, 'click', function () {
-	    return toggleSunlight();
-	  });
+	  domEvents.addEventListener(sun.mesh, 'click', toggleSunlight);
 	
 	  scene.add(sun.mesh);
 	  scene.add(glow.mesh);
@@ -364,6 +362,7 @@
 	    createSunlight();
 	    decreaseMangoSize();
 	    shining = false;
+	    window.setTimeout(toggleSunlight, 2000);
 	  } else {
 	    scene.remove(sunlight);
 	    shining = true;
@@ -375,10 +374,13 @@
 	  if (pourWater) {
 	    createParticles();
 	    pourWater = false;
-	  } else {
-	    scene.remove(particleGroup);
-	    pourWater = true;
+	    window.setTimeout(removeParticles, 2000);
 	  }
+	}
+	
+	function removeParticles() {
+	  scene.remove(particleGroup);
+	  pourWater = true;
 	}
 	
 	var particleGroup = void 0,
