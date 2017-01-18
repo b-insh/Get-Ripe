@@ -303,11 +303,13 @@ function toggleSunlight() {
     createSunlight();
     decreaseMangoSize();
     shining = false;
-    window.setTimeout(toggleSunlight, 2000);
-  } else {
-    scene.remove(sunlight);
-    shining = true;
+    window.setTimeout( removeSunlight, 2000);
   }
+}
+
+function removeSunlight() {
+  scene.remove(sunlight);
+  shining = true;
 }
 
 let pourWater = true;
